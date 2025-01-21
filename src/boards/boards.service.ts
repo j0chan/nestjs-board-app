@@ -11,6 +11,11 @@ export class BoardsService {
     getAllBoards(): Board[] {
         return this.boards
     }
+    
+    // 특정 게시글 조회 기능
+    getBoardDetailById(id: number): Board {
+        return this.boards.find((board) => board.id == id)
+    }
 
     // 게시글 작성 기능
     createBoard(author: string, title: string, contents: string) {
