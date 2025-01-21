@@ -8,6 +8,7 @@ export class BoardsService {
     // 테스트 용도로 boards배열을 임시 DB로 사용
     private boards: Board[] = []
 
+
     // 게시글 조회 기능
     getAllBoards(): Board[] {
         return this.boards
@@ -16,6 +17,11 @@ export class BoardsService {
     // 특정 게시글 조회 기능
     getBoardDetailById(id: number): Board {
         return this.boards.find((board) => board.id == id)
+    }
+
+    // 특정 키워드(작성자)로 검색한 게시글 조회 기능
+    getBoardsByKeyword(author: string): Board[] {
+        return this.boards.filter((board) => board.author === author)
     }
 
     // 게시글 작성 기능
