@@ -41,4 +41,9 @@ export class BoardsService {
 
         return savedBoard;
     }
+
+    // 게시글 삭제 기능
+    deleteBoardById(id: number): void {
+        this.boards = this.boards.filter((board) => board.id != id)
+    }
 }
