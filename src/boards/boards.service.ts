@@ -12,6 +12,12 @@ export class BoardsService {
 
     // 게시글 조회 기능
     getAllBoards(): Board[] {
+        const foundBoard = this.boards
+
+        if(foundBoard.length === 0 ) {
+            throw new NotFoundException('Board not found')
+        }
+
         return this.boards
     }
     
@@ -20,7 +26,7 @@ export class BoardsService {
         const foundBoard = this.boards.find((board) => board.id == id)
 
         if(!foundBoard) {
-            throw new NotFoundException(`Board with ID ${id} not found`)
+            throw new NotFoundException(`Board with ID:${id} not found`)
         }
         
         return foundBoard
@@ -28,7 +34,13 @@ export class BoardsService {
 
     // 특정 키워드(작성자)로 검색한 게시글 조회 기능
     getBoardsByKeyword(author: string): Board[] {
-        return this.boards.filter((board) => board.author === author)
+        const foundBoards =  this.boards.filter((board) => board.author === author)
+
+        if(foundBoards.length === 0) {
+            throw new NotFoundException(`Boards with Author:${author} not found`)
+        }
+
+        return foundBoards
     }
 
     // 게시글 작성 기능
@@ -72,6 +84,13 @@ export class BoardsService {
 
     // 게시글 삭제 기능
     deleteBoardById(id: number): void {
-        this.boards = this.boards.filter((board) => board.id != id)
+        const startLength = this.boards.length
+        const endLength = this.boards.filter((board) => board.id !== Number(id)).length
+    
+        if (startLength === endLength) {
+            throw new NotFoundException(`Board with ID:${id} not found`)
+        }
+
+        this.boards = this.boards.filter((board) => board.id !== Number(id))
     }
 }
