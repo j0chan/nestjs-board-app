@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Board } from './boards.entity';
 import { BoardStatus } from './boards-status.enum';
 import { CreateBoardDto } from './dto/create-board.dto';
@@ -76,9 +76,14 @@ export class BoardsService {
 
     // 특정 번호의 게시글 일부 수정
     updateBoardStatusById(id: number, status: BoardStatus): Board {
-        // 특정 보드 가져오는 메서드 재활용
         const foundBoard = this.getBoardDetailById(id)
+
+        if(foundBoard.status === status) {
+            throw new BadRequestException(`Status is already ${status}`)
+        }
+
         foundBoard.status = status
+        
         return foundBoard
     }
 
