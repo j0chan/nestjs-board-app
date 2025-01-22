@@ -31,8 +31,8 @@ export class BoardsController {
 
     // 게시글 작성 기능
     @Post('/')
-    createBoard(@Body() CreateBoardDto: CreateBoardDto) {
-        return this.boardsService.createBoard(CreateBoardDto)
+    createBoard(@Body() createBoardDto: CreateBoardDto) {
+        return this.boardsService.createBoard(createBoardDto)
     }
 
     // 특정 번호의 게시글 수정
