@@ -67,6 +67,10 @@ export class BoardsService {
         const foundBoard = this.getBoardDetailById(id)
 
         const {title, contents} = updateBoardDto
+        
+        if(!title || !contents) {
+            throw new BadRequestException('Title and Contents must be provided')
+        }
 
         foundBoard.title = title
         foundBoard.contents = contents
