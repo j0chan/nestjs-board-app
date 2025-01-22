@@ -4,6 +4,7 @@ import { Board } from './boards.entity';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { BoardStatus } from './boards-status.enum';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
 
 @Controller('api/boards')
 @UsePipes(ValidationPipe) // UsePipes 어노테이션으로 파이프를 통한 유효성 검증 활성화
@@ -48,7 +49,7 @@ export class BoardsController {
     @Patch('/:id')
     updateBoardStatusById(
         @Param('id') id: number,
-        @Body('status') status: BoardStatus): Board {
+        @Body('status', BoardStatusValidationPipe) status: BoardStatus): Board {
         return this.boardsService.updateBoardStatusById(id, status)
     }
 
