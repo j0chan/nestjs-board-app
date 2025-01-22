@@ -47,6 +47,10 @@ export class BoardsService {
     createBoard(createBoardDto: CreateBoardDto) {
         const {author, title, contents} = createBoardDto
 
+        if(!author || !title || !contents) {
+            throw new BadRequestException('Author, Title and Contents must be provided')
+        }
+
         const board: Board = {
             id: this.boards.length + 1, // 임시 auto increament 기능
             author,
