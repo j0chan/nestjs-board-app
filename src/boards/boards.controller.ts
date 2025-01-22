@@ -6,6 +6,7 @@ import { BoardStatus } from './boards-status.enum';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Controller('api/boards')
+@UsePipes(ValidationPipe) // UsePipes 어노테이션으로 파이프를 통한 유효성 검증 활성화
 export class BoardsController {
     // 생성자 주입
     constructor(private boardsService : BoardsService){}
@@ -31,7 +32,6 @@ export class BoardsController {
 
     // 게시글 작성 기능
     @Post('/')
-    @UsePipes(ValidationPipe) // UsePipes 어노테이션으로 파이프를 통한 유효성 검증 활성화
     createBoard(@Body() createBoardDto: CreateBoardDto) {
         return this.boardsService.createBoard(createBoardDto)
     }
