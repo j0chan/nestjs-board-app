@@ -17,7 +17,11 @@ export class BoardsRepository {
 
     // 게시글 조회 관련 데이터 액세스
     async findAll(): Promise<Board[]> {
-        const selectQuery = `SELECT * FROM board`
+        const selectQuery = `
+            SELECT * 
+            FROM board
+        `
+
         try {
             const[result] = await this.connectionPool.query(selectQuery)
             return result as Board[]
@@ -26,4 +30,19 @@ export class BoardsRepository {
         }
     }
 
+    // 게시글 작성 관련 데이터 액세스
+    async saveBoard(board: Board): Promise<string> {
+        const insertQuery = `
+            INSERT INTO board(author, title, contents, status)
+            VALUES(?, ?, ?, ?)
+        `
+
+        try {
+            const result = await this.connectionPool.query(insertQuery, [board.author, board.title, board.contents, board.status])
+            const msg = "Created Success!"
+            return msg
+        } catch (err) {
+            throw new InternalServerErrorException('Database query failed', err)
+        }
+    }
 }
