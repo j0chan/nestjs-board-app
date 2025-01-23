@@ -14,29 +14,29 @@ export class BoardsService {
     getAllBoards(): Board[] {
         const foundBoard = this.boards
 
-        if(foundBoard.length === 0 ) {
+        if (foundBoard.length === 0) {
             throw new NotFoundException('Board not found')
         }
 
         return this.boards
     }
-    
+
     // 특정 게시글 조회 기능
     getBoardDetailById(id: number): Board {
         const foundBoard = this.boards.find((board) => board.id == id)
 
-        if(!foundBoard) {
+        if (!foundBoard) {
             throw new NotFoundException(`Board with ID:${id} not found`)
         }
-        
+
         return foundBoard
     }
 
     // 특정 키워드(작성자)로 검색한 게시글 조회 기능
     getBoardsByKeyword(author: string): Board[] {
-        const foundBoards =  this.boards.filter((board) => board.author === author)
+        const foundBoards = this.boards.filter((board) => board.author === author)
 
-        if(foundBoards.length === 0) {
+        if (foundBoards.length === 0) {
             throw new NotFoundException(`Boards with Author:${author} not found`)
         }
 
@@ -45,9 +45,9 @@ export class BoardsService {
 
     // 게시글 작성 기능
     createBoard(createBoardDto: CreateBoardDto) {
-        const {author, title, contents} = createBoardDto
+        const { author, title, contents } = createBoardDto
 
-        if(!author || !title || !contents) {
+        if (!author || !title || !contents) {
             throw new BadRequestException('Author, Title and Contents must be provided')
         }
 
@@ -70,9 +70,9 @@ export class BoardsService {
         // 특정 보드 가져오는 메서드 재활용
         const foundBoard = this.getBoardDetailById(id)
 
-        const {title, contents} = updateBoardDto
-        
-        if(!title || !contents) {
+        const { title, contents } = updateBoardDto
+
+        if (!title || !contents) {
             throw new BadRequestException('Title and Contents must be provided')
         }
 
@@ -86,12 +86,12 @@ export class BoardsService {
     updateBoardStatusById(id: number, status: BoardStatus): Board {
         const foundBoard = this.getBoardDetailById(id)
 
-        if(foundBoard.status === status) {
+        if (foundBoard.status === status) {
             throw new BadRequestException(`Status is already ${status}`)
         }
 
         foundBoard.status = status
-        
+
         return foundBoard
     }
 
@@ -99,7 +99,7 @@ export class BoardsService {
     deleteBoardById(id: number): void {
         const startLength = this.boards.length
         const endLength = this.boards.filter((board) => board.id !== Number(id)).length
-    
+
         if (startLength === endLength) {
             throw new NotFoundException(`Board with ID:${id} not found`)
         }
