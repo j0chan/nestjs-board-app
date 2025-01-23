@@ -5,6 +5,7 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { BoardStatus } from './boards-status.enum';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
+import { BoardResponseDto } from './dto/board-response.dto';
 
 @Controller('api/boards')
 @UsePipes(ValidationPipe) // UsePipes 어노테이션으로 파이프를 통한 유효성 검증 활성화
@@ -15,8 +16,10 @@ export class BoardsController {
 
     // 게시글 조회 기능
     @Get('/')
-    async getAllBoards(): Promise<Board[]> {
-        return await this.boardsService.getAllBoards()
+    async getAllBoards(): Promise<BoardResponseDto[]> {
+        const boards: Board[] = await this.boardsService.getAllBoards()
+        const boardsResponseDto = boards.map(board => new BoardResponseDto(board))
+        return boardsResponseDto
     }
 
     // // 특정 게시글 조회 기능 [endpoint 파라미터로 id 사용]
@@ -33,7 +36,7 @@ export class BoardsController {
 
     // 게시글 작성 기능
     @Post('/')
-    createBoard(@Body() createBoardDto: CreateBoardDto) {
+    async createBoard(@Body() createBoardDto: CreateBoardDto):Promise<string> {
         return this.boardsService.createBoard(createBoardDto)
     }
 
