@@ -8,12 +8,12 @@ import { BoardsRepository } from './boards.repository';
 @Injectable()
 export class BoardsService {
     // Repository 계층 DI
-    constructor(private BoardsRepository: BoardsRepository) { }
+    constructor(private boardsRepository: BoardsRepository) { }
 
 
     // 게시글 조회 기능
     async getAllBoards(): Promise<Board[]> {
-        const foundBoard = await this.BoardsRepository.findAll()
+        const foundBoard = await this.boardsRepository.findAll()
         return foundBoard
     }
 
@@ -55,7 +55,7 @@ export class BoardsService {
             status: BoardStatus.PUBLIC,
         }
 
-        const createdBoard = this.BoardsRepository.saveBoard(board)
+        const createdBoard = this.boardsRepository.saveBoard(board)
 
         return createdBoard;
     }
