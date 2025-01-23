@@ -40,7 +40,7 @@ export class BoardsService {
     // }
 
     // 게시글 작성 기능
-    createBoard(createBoardDto: CreateBoardDto) {
+    async createBoard(createBoardDto: CreateBoardDto) {
         const { author, title, contents } = createBoardDto
 
         if (!author || !title || !contents) {
@@ -48,17 +48,16 @@ export class BoardsService {
         }
 
         const board: Board = {
-            id: this.boards.length + 1, // 임시 auto increament 기능
-            author,
+            id: 0, //임시 초기화
+            author, // author: createBoardDto.author
             title,
             contents,
             status: BoardStatus.PUBLIC,
         }
 
-        // DB에 만들어진 board 객체를 push
-        const savedBoard = this.boards.push(board)
+        const createdBoard = this.BoardsRepository.saveBoard(board)
 
-        return savedBoard;
+        return createdBoard;
     }
 
     // // 특정 번호의 게시글 수정
