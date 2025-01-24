@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Board } from './boards.entity';
 import { BoardStatus } from './boards-status.enum';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Injectable()
 export class BoardsService {
@@ -13,95 +14,74 @@ export class BoardsService {
         private boardsRepository: Repository<Board>
     ) { }
 
-
     // 게시글 조회 기능
     async getAllBoards(): Promise<Board[]> {
-        const foundBoard = await this.boardsRepository.findAll()
+        const foundBoard = await this.boardsRepository.find()
         return foundBoard
     }
 
-    // // 특정 게시글 조회 기능
-    // getBoardDetailById(id: number): Board {
-    //     const foundBoard = this.boards.find((board) => board.id == id)
+    // 특정 게시글 조회 기능
+    async getBoardDetailById(id: number): Promise<Board> {
+        const foundBoard = await this.boardsRepository.findOneBy({ id: id })
+        if (!foundBoard) {
+            throw new NotFoundException(`Board with ID:${id} not found`)
+        }
+        return foundBoard
+    }
 
-    //     if (!foundBoard) {
-    //         throw new NotFoundException(`Board with ID:${id} not found`)
-    //     }
-
-    //     return foundBoard
-    // }
-
-    // // 특정 키워드(작성자)로 검색한 게시글 조회 기능
-    // getBoardsByKeyword(author: string): Board[] {
-    //     const foundBoards = this.boards.filter((board) => board.author === author)
-
-    //     if (foundBoards.length === 0) {
-    //         throw new NotFoundException(`Boards with Author:${author} not found`)
-    //     }
-
-    //     return foundBoards
-    // }
+    // 특정 키워드(작성자)로 검색한 게시글 조회 기능
+    async getBoardsByKeyword(author: string): Promise<Board[]> {
+        if (!author) {
+            throw new BadRequestException('Author keyword must be provided')
+        }
+        const foundBoards = await this.boardsRepository.findBy({ author: author })
+        if (foundBoards.length === 0) {
+            throw new NotFoundException(`Boards with Author:${author} not found`)
+        }
+        return foundBoards
+    }
 
     // 게시글 작성 기능
-    async createBoard(createBoardDto: CreateBoardDto) {
+    async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
         const { author, title, contents } = createBoardDto
-
         if (!author || !title || !contents) {
             throw new BadRequestException('Author, Title and Contents must be provided')
         }
-
-        const board: Board = {
+        const newBoard: Board = {
             id: 0, //임시 초기화
             author, // author: createBoardDto.author
             title,
             contents,
             status: BoardStatus.PUBLIC,
         }
-
-        const message = this.boardsRepository.saveBoard(board)
-
-        return message;
+        const createdBoard = await this.boardsRepository.save(newBoard)
+        return createdBoard;
     }
 
-    // // 특정 번호의 게시글 수정
-    // updateBoardById(id: number, updateBoardDto: UpdateBoardDto): Board {
-    //     // 특정 보드 가져오는 메서드 재활용
-    //     const foundBoard = this.getBoardDetailById(id)
+    // 특정 번호의 게시글 수정
+    async updateBoardById(id: number, updateBoardDto: UpdateBoardDto): Promise<Board> {
+        const foundBoard = await this.getBoardDetailById(id)
+        const { title, contents } = updateBoardDto
+        if (!title || !contents) {
+            throw new BadRequestException('Title and Contents must be provided')
+        }
+        foundBoard.title = title
+        foundBoard.contents = contents
+        const updatedBoard = await this.boardsRepository.save(foundBoard)
+        return updatedBoard
+    }
 
-    //     const { title, contents } = updateBoardDto
+    // 특정 번호의 게시글 일부 수정
+    async updateBoardStatusById(id: number, status: BoardStatus): Promise<void> {
+        const result = await this.boardsRepository.update(id, { status })
+        if (result.affected === 0) {
+            throw new NotFoundException(`Board with ID ${id} not found`)
+        }
+    }
 
-    //     if (!title || !contents) {
-    //         throw new BadRequestException('Title and Contents must be provided')
-    //     }
-
-    //     foundBoard.title = title
-    //     foundBoard.contents = contents
-
-    //     return foundBoard
-    // }
-
-    // // 특정 번호의 게시글 일부 수정
-    // updateBoardStatusById(id: number, status: BoardStatus): Board {
-    //     const foundBoard = this.getBoardDetailById(id)
-
-    //     if (foundBoard.status === status) {
-    //         throw new BadRequestException(`Status is already ${status}`)
-    //     }
-
-    //     foundBoard.status = status
-
-    //     return foundBoard
-    // }
-
-    // // 게시글 삭제 기능
-    // deleteBoardById(id: number): void {
-    //     const startLength = this.boards.length
-    //     const endLength = this.boards.filter((board) => board.id !== Number(id)).length
-
-    //     if (startLength === endLength) {
-    //         throw new NotFoundException(`Board with ID:${id} not found`)
-    //     }
-
-    //     this.boards = this.boards.filter((board) => board.id !== Number(id))
-    // }
+    // 게시글 삭제 기능
+    async deleteBoardById(id: number): Promise<void> {
+        const foundBoard = await this.getBoardDetailById(id)
+        await this.boardsRepository.delete(foundBoard)
+    }
 }
