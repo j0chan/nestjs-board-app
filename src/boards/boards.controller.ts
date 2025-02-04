@@ -9,7 +9,6 @@ import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe'
 import { BoardStatus } from './boards-status.enum';
 
 @Controller('api/boards')
-@UsePipes(ValidationPipe) // UsePipes 어노테이션으로 파이프를 통한 유효성 검증 활성화
 export class BoardsController {
     // 생성자 주입
     constructor(private boardsService: BoardsService) { }
