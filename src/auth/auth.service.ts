@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './users.entity';
 import { UserRole } from './users-role.enum';
 import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -22,10 +23,13 @@ export class AuthService {
         // 이메일 중복 확인
         await this.checkEmailExist(email)
 
+        // 비밀번호 해싱
+        const hashedPassword = await this.hashPassword(password)
+
         const newUser: User = {
             id: 0,
             username,
-            password,
+            password: hashedPassword,
             email,
             role: UserRole.USER,
         }
@@ -38,5 +42,10 @@ export class AuthService {
         if (existingUser) {
             throw new ConflictException('Email already exists')
         }
+    }
+
+    async hashPassword(password: string): Promise<string> {
+        const salt = await bcrypt.genSalt() // 솔트 생성
+        return await bcrypt.hash(password, salt) // 비밀번호 해싱
     }
 }
