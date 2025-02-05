@@ -37,7 +37,7 @@ export class AuthController {
     @Post('/test')
     @UseGuards(AuthGuard('jwt')) // @UseGuard: 해당 인증 가드가 적용되는 라우터 명시
                                  // AuthGuard: 인증 가드가 어떤 전략을 사용할 지 결정
-    async testForAuth(@Req() req: Request) {
+    testForAuth(@Req() req: Request) {
         console.log(req.user)
         return {message: 'Authenticated User', user: req.user}
     } 
