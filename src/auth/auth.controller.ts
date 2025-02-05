@@ -1,9 +1,10 @@
-import { Body, Controller, Post, Res, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('api/auth')
 export class AuthController {
@@ -31,4 +32,13 @@ export class AuthController {
 
         res.send({ message: 'Login Success' })
     }
+
+    // JWT 동작 테스트
+    @Post('/test')
+    @UseGuards(AuthGuard('jwt')) // @UseGuard: 해당 인증 가드가 적용되는 라우터 명시
+                                 // AuthGuard: 인증 가드가 어떤 전략을 사용할 지 결정
+    async testForAuth(@Req() req: Request) {
+        console.log(req.user)
+        return {message: 'Authenticated User', user: req.user}
+    } 
 }
