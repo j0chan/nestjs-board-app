@@ -24,13 +24,8 @@ export class AuthController {
     async signIn(@Body() loginUserDto: LoginUserDto, @Res() res: Response): Promise<void> {
         const accessToken = await this.authService.signIn(loginUserDto)
 
-        // [2] JWT를 쿠키에 저장
-        res.cookie('Authorization', accessToken, {
-            httpOnly: true,
-            secure: false,
-            maxAge: 360000,
-            sameSite: 'none'
-        })
+        // [2] JWT를 헤더에 저장
+        res.setHeader('Authorization', accessToken)
 
         res.send({ message: 'Login Success' })
     }
