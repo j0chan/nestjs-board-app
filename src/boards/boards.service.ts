@@ -53,6 +53,7 @@ export class BoardsService {
             title,
             contents,
             status: BoardStatus.PUBLIC,
+            user: null
         }
         const createdBoard = await this.boardsRepository.save(newBoard)
         return createdBoard;
