@@ -1,13 +1,12 @@
-import { LoginUserDto } from './dto/login-user.dto';
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, Res, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './users.entity';
-import { UserRole } from './users-role.enum';
-import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './user.entity';
+import { UserRole } from './user-role.enum';
+import { SignUpRequestDto } from './dto/sign-up-request.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
+import { SignInRequestDto } from './dto/sign-in-request.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,9 +18,9 @@ export class AuthService {
     ) { }
 
     // 회원 가입
-    async createUser(createUserDto: CreateUserDto): Promise<User> {
-        this.logger.verbose(`Visitor is creating a new account with email: ${createUserDto.email}`)
-        const { username, password, email, role } = createUserDto
+    async createUser(signUpRequestDto: SignUpRequestDto): Promise<User> {
+        this.logger.verbose(`Visitor is creating a new account with email: ${signUpRequestDto.email}`)
+        const { username, password, email, role } = signUpRequestDto
         if (!username || !password || !email || !role) {
             throw new BadRequestException('Something went wrong.')
         }
@@ -43,9 +42,9 @@ export class AuthService {
     }
 
     // 로그인
-    async signIn(loginUserDto: LoginUserDto): Promise<string> {
-        this.logger.verbose(`User with email: ${loginUserDto.email} is signing in`)
-        const { email, password } = loginUserDto
+    async signIn(signInRequestDto: SignInRequestDto): Promise<string> {
+        this.logger.verbose(`User with email: ${signInRequestDto.email} is signing in`)
+        const { email, password } = signInRequestDto
 
         try {
             const existingUser = await this.findUserByEmail(email)
@@ -55,7 +54,6 @@ export class AuthService {
                 throw new UnauthorizedException('Invalid credentials')
             }
 
-            // [1] JWT 토큰 생성
             const payload = {
                 id: existingUser.id,
                 email: existingUser.email,
@@ -63,8 +61,8 @@ export class AuthService {
                 role: existingUser.role,
             }
             const accessToken = await this.jwtService.sign(payload)
-            
-            this.logger.verbose(`User with email: ${loginUserDto.email} issued JWT ${accessToken}`)
+
+            this.logger.verbose(`User with email: ${signInRequestDto.email} issued JWT ${accessToken}`)
             return accessToken
         } catch (error) {
             this.logger.error(`Invalid credentials or Internal Server error`)
@@ -91,7 +89,7 @@ export class AuthService {
 
     // 비밀번호 해싱
     async hashPassword(password: string): Promise<string> {
-        const salt = await bcrypt.genSalt() // 솔트 생성
-        return await bcrypt.hash(password, salt) // 비밀번호 해싱
+        const salt = await bcrypt.genSalt()
+        return await bcrypt.hash(password, salt)
     }
 }

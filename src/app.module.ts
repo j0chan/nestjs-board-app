@@ -1,5 +1,5 @@
-import { Module, UnauthorizedException } from '@nestjs/common';
-import { BoardsModule } from './boards/boards.module';
+import { Module } from '@nestjs/common';
+import { ArticleModule } from './articles/article.module';
 import { BlogsModule } from './blog/blogs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './configs/typeorm.config';
@@ -13,7 +13,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
   imports: [
     GlobalModule,
     TypeOrmModule.forRoot(typeOrmConfig),
-    BoardsModule,
+    ArticleModule,
     BlogsModule, AuthModule,
   ],
   providers: [
