@@ -68,8 +68,9 @@ export class BoardsController {
         return boardResponseDto
     }
 
-    // 특정 번호의 게시글 일부 수정
+    // 특정 번호의 게시글 일부 수정 [ADMIN 가능]
     @Patch('/:id')
+    @Roles(UserRole.ADMIN)
     async updateBoardStatusById(
         @Param('id') id: number,
         @Body('status', BoardStatusValidationPipe) status: BoardStatus): Promise<void> {
@@ -78,7 +79,8 @@ export class BoardsController {
 
     // 게시글 삭제 기능
     @Delete('/:id')
-    async deleteBoardById(@Param('id') id: number): Promise<void> {
-        this.boardsService.deleteBoardById(id)
+    @Roles(UserRole.USER, UserRole.ADMIN)
+    async deleteBoardById(@Param('id') id: number, @GetUser() logginedUser: User): Promise<void> {
+        this.boardsService.deleteBoardById(id, logginedUser)
     }
 }

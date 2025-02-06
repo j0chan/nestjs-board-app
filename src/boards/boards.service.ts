@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Board } from './boards.entity';
 import { BoardStatus } from './boards-status.enum';
 import { CreateBoardDto } from './dto/create-board.dto';
@@ -36,7 +36,11 @@ export class BoardsService {
 
     // 특정 게시글 조회 기능
     async getBoardDetailById(id: number): Promise<Board> {
-        const foundBoard = await this.boardsRepository.findOneBy({ id: id })
+        const foundBoard = await this.boardsRepository.createQueryBuilder('board')
+            .leftJoinAndSelect('board.user', 'user')
+            .where('board.id = :id', { id })
+            .getOne()
+
         if (!foundBoard) {
             throw new NotFoundException(`Board with ID:${id} not found`)
         }
@@ -94,8 +98,12 @@ export class BoardsService {
     }
 
     // 게시글 삭제 기능
-    async deleteBoardById(id: number): Promise<void> {
+    async deleteBoardById(id: number, logginedUser: User): Promise<void> {
         const foundBoard = await this.getBoardDetailById(id)
+        // 작성자와 삭제 요청한 사용자가 같은 지 확인
+        if (foundBoard.user.id !== logginedUser.id) {
+            throw new UnauthorizedException('Do not have permission to delete this board')
+        }
         await this.boardsRepository.delete(foundBoard)
     }
 }
