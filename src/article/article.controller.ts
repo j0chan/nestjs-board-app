@@ -10,17 +10,18 @@ import { ArticleStatus } from './article-status.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/custom-role.guard';
 import { Roles } from 'src/auth/roles.decorator';
-import { UserRole } from 'src/auth/user-role.enum';
+import { UserRole } from 'src/user/user-role.enum';
 import { GetUser } from 'src/auth/get-user.decorator';
-import { User } from 'src/auth/user.entity';
+import { User } from 'src/user/user.entity';
 
 @Controller('api/articles')
 @UseGuards(AuthGuard(), RolesGuard)
 export class ArticleController {
     private readonly logger = new Logger(ArticleController.name)
+
     constructor(private articleService: ArticleService) { }
 
-    // 게시글 작성 기능
+    // CREATE
     @Post('/')
     async createArticle(@Body() createArticleRequestDto: CreateArticleRequestDto, @GetUser() logginedUser: User): Promise<ArticleResponseDto> {
         this.logger.verbose(`User: ${logginedUser.username} is try to creating a new Article with title: ${createArticleRequestDto.title}`)
@@ -31,7 +32,7 @@ export class ArticleController {
         return articleResponseDto
     }
 
-    // 게시글 조회 기능
+    // READ - all
     @Get('/')
     @Roles(UserRole.USER)
     async getAllArticles(): Promise<ArticleResponseDto[]> {
@@ -44,7 +45,7 @@ export class ArticleController {
         return articlesResponseDto
     }
 
-    // 로그인된 유저의 게시글 조회 기능
+    // READ - by Loggined User
     @Get('/myArticles')
     async getMyAllArticles(@GetUser() logginedUser: User): Promise<ArticleResponseDto[]> {
         this.logger.verbose(`Try to Retrieving ${logginedUser.username}'s all Articles`)
@@ -56,7 +57,7 @@ export class ArticleController {
         return articlesResponseDto
     }
 
-    // 특정 게시글 조회 기능
+    // READ - by id
     @Get('/:id')
     async getArticleDetailById(@Param('id') id: number): Promise<SearchArticleResponseDto> {
         this.logger.verbose(`Try to Retrieving a Article by id: ${id}`)
@@ -67,7 +68,7 @@ export class ArticleController {
         return articleResponseDto
     }
 
-    // 특정 키워드(작성자)로 검색한 게시글 조회 기능
+    // READ - by keyword
     @Get('/search/:keyword')
     async getArticlesByKeyword(@Query('author') author: string): Promise<SearchArticleResponseDto[]> {
         this.logger.verbose(`Try to Retrieving Articles by author: ${author}`)
@@ -79,7 +80,7 @@ export class ArticleController {
         return articlesSearchResponseDto
     }
 
-    //특정 번호의 게시글 수정
+    // UPDATE - by id
     @Put('/:id')
     async updateArticleById(
         @Param('id') id: number, @Body() updateArticleRequestDto: UpdateArticleRequestDto): Promise<Article> {
@@ -91,7 +92,7 @@ export class ArticleController {
         return articleResponseDto
     }
 
-    // 특정 번호의 게시글 일부 수정 [ADMIN 가능]
+    // UPDATE - by status <ADMIN>
     @Patch('/:id')
     @Roles(UserRole.ADMIN)
     async updateArticleStatusById(
@@ -103,7 +104,7 @@ export class ArticleController {
         this.logger.verbose(`ADMIN has Updated a Article status to ${status} Successfully`)
     }
 
-    // 게시글 삭제 기능
+    // DELETE - by id
     @Delete('/:id')
     @Roles(UserRole.USER, UserRole.ADMIN)
     async deleteArticleById(@Param('id') id: number, @GetUser() logginedUser: User): Promise<void> {
