@@ -21,6 +21,19 @@ export class BoardsService {
         return foundBoard
     }
 
+    // 나의 게시글 조회 기능
+    async getMyAllBoards(logginedUser: User): Promise<Board[]> {
+        // 기본 조회에서는 엔터티를 즉시 로딩으로 변경해야 User에 접근할 수 있다.
+        // const foundBoard = await this.boardsRepository.findBy({ user: logginedUser })
+
+        // 쿼리 빌더를 통한 lazy loading 설정된 엔터티와 관계를 가진 엔터티(User)에 명시적 접근
+        const foundBoard = await this.boardsRepository.createQueryBuilder('board')
+            .leftJoinAndSelect('board.user', 'user') // 사용자 정보를 조인(레이지 로딩 상태에서 User 추가 쿼리)
+            .where('board.userId = :userId', { userId: logginedUser.id })
+            .getMany()
+        return foundBoard
+    }
+
     // 특정 게시글 조회 기능
     async getBoardDetailById(id: number): Promise<Board> {
         const foundBoard = await this.boardsRepository.findOneBy({ id: id })
@@ -45,10 +58,10 @@ export class BoardsService {
     // 게시글 작성 기능
     async createBoard(createBoardDto: CreateBoardDto, logginedUser: User): Promise<Board> {
         const { title, contents } = createBoardDto
-        if ( !title || !contents) {
+        if (!title || !contents) {
             throw new BadRequestException('Title and Contents must be provided')
         }
-        const newBoard: Board = this.boardsRepository.create ({
+        const newBoard: Board = this.boardsRepository.create({
             author: logginedUser.username,
             title,
             contents,
