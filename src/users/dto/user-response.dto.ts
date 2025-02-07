@@ -1,5 +1,5 @@
-import { UserRole } from "../user-role.enum"
-import { User } from "../user.entity"
+import { UserRole } from "../entities/user-role.enum"
+import { User } from "../entities/user.entity"
 
 export class UserResponseDto {
     id: number
@@ -13,5 +13,4 @@ export class UserResponseDto {
         this.email = user.email
         this.role = user.role
     }
-
 }
